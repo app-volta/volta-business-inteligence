@@ -54,3 +54,16 @@ O proximo passo natural e conectar o dashboard ao schema `bi` e criar os visuais
 dos tickets de BI. Databricks so deve entrar se a banca exigir demonstracao de
 lakehouse ou se o volume de dados passar a justificar uma camada analitica fora
 do PostgreSQL.
+
+## SCRUM-1903: grafico de barras por setor
+
+Use `bi.mart_occurrences_dashboard` como fonte do visual ou execute a consulta
+em `sql/queries/1903_occurrences_by_sector.sql`:
+
+- eixo: `sector_name`;
+- valor: contagem de `incident_id`;
+- filtros: `company_id`, `date_key`, `status`, `priority` ou `waste_category`;
+- tooltip opcional: soma de `estimated_quantity_kg`.
+
+O agrupamento sempre preserva `company_id` e `area_id`, pois o nome do setor
+nao e necessariamente unico entre empresas.
