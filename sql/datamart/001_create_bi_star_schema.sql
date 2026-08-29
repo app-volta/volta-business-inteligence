@@ -90,8 +90,17 @@ SELECT
     ar.ai_contamination_level,
     ar.generated_at AS ai_report_generated_at
 FROM public.incident i
-LEFT JOIN public.ai_report ar
-    ON ar.incident_id = i.id;
+LEFT JOIN LATERAL (
+    SELECT
+        ar.id,
+        ar.detected_waste_type,
+        ar.ai_contamination_level,
+        ar.generated_at
+    FROM public.ai_report ar
+    WHERE ar.incident_id = i.id
+    ORDER BY ar.generated_at DESC, ar.id DESC
+    LIMIT 1
+) ar ON TRUE;
 
 CREATE OR REPLACE VIEW bi.fact_collection AS
 WITH status_rollup AS (
@@ -149,7 +158,12 @@ SELECT
     em.total_recycled_kg,
     em.recycling_percentage,
     em.calculated_at,
-    em.calculated_at::date AS calculated_date_key
+    em.calculated_at::date AS calculated_date_key,
+    CASE
+        WHEN em.period ~ '^\\d{4}-\\d{2}$'
+        THEN to_date(em.period || '-01', 'YYYY-MM-DD')
+        ELSE NULL
+    END AS period_date
 FROM public.esg_metric em;
 
 CREATE OR REPLACE VIEW bi.fact_cooperative_review AS
@@ -255,7 +269,7 @@ SELECT
     fem.recycling_percentage
         - LAG(fem.recycling_percentage) OVER (
             PARTITION BY fem.company_id
-            ORDER BY fem.period
+            ORDER BY fem.period_date NULLS LAST, fem.calculated_at
         ) AS recycling_percentage_delta
 FROM bi.fact_esg_metric fem
 JOIN bi.dim_company dc
