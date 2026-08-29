@@ -34,6 +34,10 @@ Essas views atendem a base dos tickets de BI: ocorrencias por setor, evolucao
 temporal, tempo de resolucao, histograma por hora, mapa geografico, cards de
 KPI, filtros e drill-down.
 
+Para o grafico de barras do SCRUM-1903, use a consulta em
+`sql/queries/1903_occurrences_by_sector.sql` sobre
+`bi.mart_occurrences_dashboard`.
+
 ## Como aplicar
 
 1. Configure a string do PostgreSQL remoto:
