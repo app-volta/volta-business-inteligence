@@ -67,3 +67,9 @@ em `sql/queries/1903_occurrences_by_sector.sql`:
 
 O agrupamento sempre preserva `company_id` e `area_id`, pois o nome do setor
 nao e necessariamente unico entre empresas.
+
+## SCRUM-1904: evolucao temporal
+
+Use `sql/queries/1904_occurrences_over_time.sql` para exibir a contagem de
+ocorrencias e o volume estimado por `date_key`, mantendo filtros opcionais por
+empresa e intervalo de datas.

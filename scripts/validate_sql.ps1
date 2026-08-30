@@ -4,6 +4,8 @@ $sqlPath = Join-Path $PSScriptRoot "..\sql\datamart\001_create_bi_star_schema.sq
 $sql = Get-Content -Raw $sqlPath
 $queryPath = Join-Path $PSScriptRoot "..\sql\queries\1903_occurrences_by_sector.sql"
 $query = Get-Content -Raw $queryPath
+$query1904Path = Join-Path $PSScriptRoot "..\sql\queries\1904_occurrences_over_time.sql"
+$query1904 = Get-Content -Raw $query1904Path
 
 $required = @(
     "CREATE SCHEMA IF NOT EXISTS bi",
@@ -41,6 +43,18 @@ foreach ($needle in @(
 )) {
     if (-not $query.Contains($needle)) {
         throw "Consulta do SCRUM-1903 invalida: $needle"
+    }
+}
+
+foreach ($needle in @(
+    "FROM bi.mart_occurrences_dashboard AS d",
+    "COUNT(DISTINCT d.incident_id)",
+    "d.date_key",
+    "GROUP BY d.date_key",
+    "ORDER BY d.date_key"
+)) {
+    if (-not $query1904.Contains($needle)) {
+        throw "Consulta do SCRUM-1904 invalida: $needle"
     }
 }
 
