@@ -7,13 +7,15 @@ WITH filters AS (
         NULL::date AS end_date
 )
 SELECT
-    d.date_key,
+    dd.date_key,
     COUNT(DISTINCT d.incident_id)::bigint AS occurrence_count,
     COALESCE(SUM(d.estimated_quantity_kg), 0)::numeric AS estimated_quantity_kg
-FROM bi.mart_occurrences_dashboard AS d
+FROM bi.dim_date AS dd
 CROSS JOIN filters AS f
-WHERE (f.company_id IS NULL OR d.company_id = f.company_id)
-  AND (f.start_date IS NULL OR d.date_key >= f.start_date)
-  AND (f.end_date IS NULL OR d.date_key < f.end_date)
-GROUP BY d.date_key
-ORDER BY d.date_key;
+LEFT JOIN bi.mart_occurrences_dashboard AS d
+    ON d.date_key = dd.date_key
+   AND (f.company_id IS NULL OR d.company_id = f.company_id)
+WHERE (f.start_date IS NULL OR dd.date_key >= f.start_date)
+  AND (f.end_date IS NULL OR dd.date_key < f.end_date)
+GROUP BY dd.date_key
+ORDER BY dd.date_key;

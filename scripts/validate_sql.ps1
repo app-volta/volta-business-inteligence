@@ -47,11 +47,12 @@ foreach ($needle in @(
 }
 
 foreach ($needle in @(
-    "FROM bi.mart_occurrences_dashboard AS d",
+    "FROM bi.dim_date AS dd",
+    "LEFT JOIN bi.mart_occurrences_dashboard AS d",
     "COUNT(DISTINCT d.incident_id)",
-    "d.date_key",
-    "GROUP BY d.date_key",
-    "ORDER BY d.date_key"
+    "dd.date_key",
+    "GROUP BY dd.date_key",
+    "ORDER BY dd.date_key"
 )) {
     if (-not $query1904.Contains($needle)) {
         throw "Consulta do SCRUM-1904 invalida: $needle"
