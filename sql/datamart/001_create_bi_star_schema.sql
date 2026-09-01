@@ -200,6 +200,7 @@ SELECT
     dd.month,
     dd.year_month,
     fi.registered_hour,
+    fi.registered_at,
     fi.priority,
     fi.status,
     fi.contamination_level,

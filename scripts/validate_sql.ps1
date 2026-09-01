@@ -8,6 +8,8 @@ $query1904Path = Join-Path $PSScriptRoot "..\sql\queries\1904_occurrences_over_t
 $query1904 = Get-Content -Raw $query1904Path
 $query1905Path = Join-Path $PSScriptRoot "..\sql\queries\1905_resolution_time_boxplot.sql"
 $query1905 = Get-Content -Raw $query1905Path
+$query1906Path = Join-Path $PSScriptRoot "..\sql\queries\1906_occurrences_by_hour.sql"
+$query1906 = Get-Content -Raw $query1906Path
 
 $required = @(
     "CREATE SCHEMA IF NOT EXISTS bi",
@@ -70,6 +72,18 @@ foreach ($needle in @(
 )) {
     if (-not $query1905.Contains($needle)) {
         throw "Consulta do SCRUM-1905 invalida: $needle"
+    }
+}
+
+foreach ($needle in @(
+    "FROM bi.mart_occurrences_dashboard AS d",
+    "America/Sao_Paulo",
+    "hour_of_day",
+    "occurrence_count",
+    "ORDER BY hour_of_day"
+)) {
+    if (-not $query1906.Contains($needle)) {
+        throw "Consulta do SCRUM-1906 invalida: $needle"
     }
 }
 
