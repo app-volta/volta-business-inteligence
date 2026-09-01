@@ -48,6 +48,11 @@ Para o histograma do SCRUM-1906, use a consulta em
 `bi.mart_occurrences_dashboard`. O horario e convertido para
 `America/Sao_Paulo` antes da agregacao.
 
+Para o mapa do SCRUM-1907, use a consulta em
+`sql/queries/1907_occurrences_map.sql` sobre
+`bi.mart_collection_performance`. Os marcadores representam as cooperativas
+associadas as ocorrencias e usam `occurrence_count` para o tamanho do ponto.
+
 ## Como aplicar
 
 1. Configure a string do PostgreSQL remoto:
