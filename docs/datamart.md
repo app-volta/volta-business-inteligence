@@ -87,3 +87,12 @@ Use `sql/queries/1906_occurrences_by_hour.sql` sobre
 `bi.mart_occurrences_dashboard`. O campo `registered_at` e convertido de UTC
 para `America/Sao_Paulo`; use `hour_of_day` no eixo X e
 `occurrence_count` no eixo Y.
+
+## SCRUM-1907: mapa geografico
+
+Use `sql/queries/1907_occurrences_map.sql` sobre
+`bi.mart_collection_performance`. Configure `longitude` e `latitude` como o
+par de coordenadas, `occurrence_count` como tamanho do marcador e
+`cooperative_name` como agrupamento ou tooltip. Como o modelo atual nao possui
+coordenadas da ocorrencia ou da area, o ponto representa a cooperativa da
+coleta associada.
