@@ -38,6 +38,11 @@ Para o grafico de barras do SCRUM-1903, use a consulta em
 `sql/queries/1903_occurrences_by_sector.sql` sobre
 `bi.mart_occurrences_dashboard`.
 
+Para o boxplot do SCRUM-1905, use a consulta em
+`sql/queries/1905_resolution_time_boxplot.sql` sobre
+`bi.mart_collection_performance`. O resultado tem uma linha por coleta
+concluida e a coluna `resolution_hours` para o eixo numerico.
+
 ## Como aplicar
 
 1. Configure a string do PostgreSQL remoto:

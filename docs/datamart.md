@@ -73,3 +73,10 @@ nao e necessariamente unico entre empresas.
 Use `sql/queries/1904_occurrences_over_time.sql` para exibir a contagem de
 ocorrencias e o volume estimado por `date_key`, mantendo filtros opcionais por
 empresa e intervalo de datas.
+
+## SCRUM-1905: boxplot do tempo de resolucao
+
+Use `sql/queries/1905_resolution_time_boxplot.sql` sobre
+`bi.mart_collection_performance`. Cada linha representa uma coleta concluida;
+use `resolution_hours` como medida do boxplot e `company_name`, `sector_name`
+ou `cooperative_name` como agrupamento opcional.
