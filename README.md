@@ -43,6 +43,11 @@ Para o boxplot do SCRUM-1905, use a consulta em
 `bi.mart_collection_performance`. O resultado tem uma linha por coleta
 concluida e a coluna `resolution_hours` para o eixo numerico.
 
+Para o histograma do SCRUM-1906, use a consulta em
+`sql/queries/1906_occurrences_by_hour.sql` sobre
+`bi.mart_occurrences_dashboard`. O horario e convertido para
+`America/Sao_Paulo` antes da agregacao.
+
 ## Como aplicar
 
 1. Configure a string do PostgreSQL remoto:

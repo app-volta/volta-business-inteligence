@@ -80,3 +80,10 @@ Use `sql/queries/1905_resolution_time_boxplot.sql` sobre
 `bi.mart_collection_performance`. Cada linha representa uma coleta concluida;
 use `resolution_hours` como medida do boxplot e `company_name`, `sector_name`
 ou `cooperative_name` como agrupamento opcional.
+
+## SCRUM-1906: histograma por hora
+
+Use `sql/queries/1906_occurrences_by_hour.sql` sobre
+`bi.mart_occurrences_dashboard`. O campo `registered_at` e convertido de UTC
+para `America/Sao_Paulo`; use `hour_of_day` no eixo X e
+`occurrence_count` no eixo Y.
