@@ -53,6 +53,11 @@ Para o mapa do SCRUM-1907, use a consulta em
 `bi.mart_collection_performance`. Os marcadores representam as cooperativas
 associadas as ocorrencias e usam `occurrence_count` para o tamanho do ponto.
 
+Para os cards de KPI do SCRUM-1908, use a consulta em
+`sql/queries/1908_operational_kpis.sql`. O resultado tem uma linha com os
+totais de ocorrencias, volume estimado, coletas, conclusoes, taxa de conclusao
+e tempo medio de resolucao.
+
 ## Como aplicar
 
 1. Configure a string do PostgreSQL remoto:
