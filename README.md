@@ -1,13 +1,15 @@
 # VOLTA Business Intelligence
 
-Repositório da camada de Business Intelligence do VOLTA, focada em dashboards,
-indicadores ESG e análise operacional sobre o banco PostgreSQL do projeto.
+Repositório da camada de Business Intelligence do VOLTA, com dashboards,
+indicadores ESG e análise operacional sobre dados originados no PostgreSQL.
 
 ## Escopo
 
-Esta camada não substitui o backend transacional. O banco relacional continua
-sendo a fonte oficial dos dados. O BI consome esses dados por meio de um Data
-Mart em Star Schema exposto no schema `bi`, com views próprias para dashboards.
+Esta camada não substitui o backend transacional: o PostgreSQL continua sendo a
+fonte oficial dos dados. O repositório mantém duas rotas analíticas distintas:
+o Data Mart PostgreSQL no schema `bi` e a pipeline Lakeflow no Databricks,
+necessária para a entrega de ETL Bronze–Silver–Gold. A pipeline não grava no
+banco operacional.
 
 ## Data Mart
 
@@ -56,7 +58,37 @@ associadas as ocorrencias e usam `occurrence_count` para o tamanho do ponto.
 Para os cards de KPI do SCRUM-1908, use a consulta em
 `sql/queries/1908_operational_kpis.sql`. O resultado tem uma linha com os
 totais de ocorrencias, volume estimado, coletas, conclusoes, taxa de conclusao
-e tempo medio de resolucao.
+e tempo medio de resolucao. `completed_collections` conta o status atual de
+conclusao; no Gold Databricks, `historically_completed_collections` é o
+indicador separado para conclusoes que ocorreram em algum momento.
+
+## Pipeline Databricks (SCRUM-1937)
+
+Os notebooks ficam em
+`databricks/pipeline/VOLTA - Pipeline BI/transformations/`:
+
+- `01_bronze_volta.ipynb`: recortes das tabelas de origem;
+- `02_silver_volta.ipynb`: tipagem, limpeza e datas locais;
+- `03_gold_volta.ipynb`: dimensões enriquecidas e agregações para dashboard.
+
+A origem é o catálogo `volta_postgres`, schema `public`. As saídas usam nomes
+totalmente qualificados no catálogo `workspace`, schemas `bronze`, `silver` e
+`gold`; portanto, os valores padrão de catálogo/esquema da configuração da
+pipeline não substituem esses nomes. Em outro workspace, ajuste os nomes
+qualificados antes de executar.
+
+No Gold, `completed_collections` segue o contrato do SCRUM-1908 e conta coletas
+cujo status atual indica conclusão. `historically_completed_collections` conta
+coletas com ao menos um evento histórico de conclusão. O tempo de resolução
+usa o primeiro evento histórico válido após a solicitação, filtrando eventos
+anteriores antes de escolher o primeiro; durações negativas ou sem horário
+válido ficam fora dos cálculos. A conclusão histórica não exige que o evento
+seja posterior à solicitação; essa condição vale apenas para a duração.
+
+`occurrences_over_time` inclui dias sem ocorrências como zero entre a primeira
+e a última data observada por empresa, para cada combinação de dimensões
+observada. Para filtros temporais além desse intervalo, o dashboard deve
+completar o calendário no visual.
 
 ## Como aplicar
 
@@ -86,3 +118,5 @@ powershell -ExecutionPolicy Bypass -File scripts/validate_sql.ps1
 ```
 
 Essa validacao confere propriedades basicas do SQL versionado antes de abrir PR.
+Os notebooks dependem do runtime do Databricks e devem ser validados executando
+a pipeline no workspace.
