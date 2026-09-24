@@ -2,16 +2,59 @@
 
 ## Decisao tecnica
 
-O Data Mart do BI e implementado como views PostgreSQL no schema `bi`.
+O PostgreSQL continua como fonte oficial dos dados operacionais. O projeto
+mantém duas rotas analíticas com finalidades diferentes:
 
-Essa escolha reduz custo e complexidade neste momento do projeto:
+1. O Data Mart PostgreSQL no schema `bi`, composto por views para consultas e
+   dashboards SQL.
+2. A pipeline Lakeflow no Databricks, adicionada para a entrega de ETL
+   Bronze–Silver–Gold do SCRUM-1937.
 
-- nao duplica dados do banco transacional;
-- nao exige pipeline Databricks antes do dashboard existir;
-- mantem uma camada semantica estavel para Power BI, Metabase, Looker Studio ou
-  outra ferramenta escolhida pelo time;
-- permite evoluir para tabelas materializadas ou Delta Lake depois, se houver
-  volume real que justifique.
+Ambas leem dados derivados do PostgreSQL; a pipeline não grava no banco
+transacional. Não trate as duas saídas como uma única tabela física: o
+consumidor do dashboard deve escolher uma rota e validar seus indicadores.
+
+## Pipeline Databricks SCRUM-1937
+
+Os notebooks versionados em
+`databricks/pipeline/VOLTA - Pipeline BI/transformations/` implementam:
+
+| Camada | Conteúdo |
+| --- | --- |
+| Bronze | Recortes das tabelas `public` necessárias aos indicadores |
+| Silver | Chaves tipadas, texto normalizado, datas locais e status de coleta |
+| Gold | Agregações de ocorrências, coletas, cooperativas e KPIs operacionais |
+
+A origem configurada é `volta_postgres.public`. As saídas são explicitamente
+qualificadas como `workspace.bronze.*`, `workspace.silver.*` e
+`workspace.gold.*`. Alterar o catálogo padrão na UI da pipeline não redireciona
+essas tabelas; ao promover os notebooks para outro catálogo/workspace, atualize
+os identificadores qualificados.
+
+### Contrato dos KPIs
+
+- `completed_collections`: coletas cujo **status atual** indica conclusão,
+  mantendo o significado da query `sql/queries/1908_operational_kpis.sql`.
+- `historically_completed_collections`: coletas com ao menos um status de
+  conclusão no histórico, mesmo se o status atual tiver sido reaberto; não
+  exige que esse evento seja posterior à solicitação.
+- `resolution_hours_sum` e `resolved_collections_count`: consideram o primeiro
+  evento histórico de conclusão válido após a solicitação, filtrando eventos
+  anteriores antes de escolher o primeiro; duração nula ou negativa não entra
+  na soma nem no denominador.
+
+Os status reconhecidos para conclusão histórica incluem `COMPLETED`, `DONE`,
+`COLLECTED`, `CONCLUIDA`, `FINALIZADA` e `COLETADA`.
+
+Os joins de área preservam `company_id` além de `area_id`, evitando associar
+um setor de outra empresa em caso de inconsistência na origem; uma divergência
+na origem mantém a ocorrência, mas deixa o setor sem correspondência. A série
+`occurrences_over_time` preenche dias zerados no intervalo observado por
+empresa e combinação de dimensões; um dashboard que mostre datas fora desse
+intervalo deve completar o calendário no visual.
+
+Para validar a pipeline, execute-a no Databricks e confirme as saídas nas três
+camadas. O runtime Lakeflow não é validado pelo script local de SQL.
 
 ## Grao das facts
 
@@ -50,10 +93,10 @@ planta/setor.
 
 ## Evolucao prevista
 
-O proximo passo natural e conectar o dashboard ao schema `bi` e criar os visuais
-dos tickets de BI. Databricks so deve entrar se a banca exigir demonstracao de
-lakehouse ou se o volume de dados passar a justificar uma camada analitica fora
-do PostgreSQL.
+O próximo passo é definir qual das duas rotas será consumida por cada
+dashboard. Se a camada Gold for adotada, mantenha os consumidores alinhados ao
+contrato documentado acima e evite recalcular o mesmo KPI com uma definição
+diferente na consulta PostgreSQL.
 
 ## SCRUM-1903: grafico de barras por setor
 
