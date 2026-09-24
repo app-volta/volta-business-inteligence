@@ -1,0 +1,911 @@
+{
+  "datasets": [
+    {
+      "name": "6407fc6d",
+      "displayName": "ds_1908_kpis_operacionais",
+      "queryLines": [
+        "WITH occurrence_kpi AS (\r\n",
+        "    SELECT\r\n",
+        "        COUNT(DISTINCT incident_id) AS total_occurrences,\r\n",
+        "        COALESCE(SUM(estimated_quantity_kg), 0) AS total_estimated_quantity_kg\r\n",
+        "    FROM volta_postgres.bi.mart_occurrences_dashboard\r\n",
+        "),\r\n",
+        "collection_kpi AS (\r\n",
+        "    SELECT\r\n",
+        "        COUNT(DISTINCT collection_id) AS total_collections,\r\n",
+        "        COUNT(DISTINCT CASE\r\n",
+        "            WHEN UPPER(current_status) IN (\r\n",
+        "                'COMPLETED',\r\n",
+        "                'DONE',\r\n",
+        "                'COLLECTED',\r\n",
+        "                'CONCLUIDA',\r\n",
+        "                'FINALIZADA',\r\n",
+        "                'COLETADA'\r\n",
+        "            )\r\n",
+        "            THEN collection_id\r\n",
+        "        END) AS completed_collections,\r\n",
+        "        AVG(\r\n",
+        "            CASE\r\n",
+        "                WHEN completed_at IS NOT NULL\r\n",
+        "                THEN resolution_time_hours\r\n",
+        "            END\r\n",
+        "        ) AS avg_resolution_hours\r\n",
+        "    FROM volta_postgres.bi.mart_collection_performance\r\n",
+        ")\r\n",
+        "SELECT\r\n",
+        "    o.total_occurrences,\r\n",
+        "    o.total_estimated_quantity_kg,\r\n",
+        "    c.total_collections,\r\n",
+        "    c.completed_collections,\r\n",
+        "    ROUND(\r\n",
+        "        100.0 * c.completed_collections / NULLIF(c.total_collections, 0),\r\n",
+        "        2\r\n",
+        "    ) AS completion_rate_pct,\r\n",
+        "    ROUND(c.avg_resolution_hours, 2) AS avg_resolution_hours\r\n",
+        "FROM occurrence_kpi o\r\n",
+        "CROSS JOIN collection_kpi c;"
+      ]
+    },
+    {
+      "name": "dc779b54",
+      "displayName": "ds_1907_mapa_cooperativas",
+      "queryLines": [
+        "SELECT\r\n",
+        "    co.name AS cooperative_name,\r\n",
+        "    co.latitude,\r\n",
+        "    co.longitude,\r\n",
+        "    COUNT(DISTINCT c.incident_id) AS occurrence_count\r\n",
+        "FROM volta_postgres.public.collection c\r\n",
+        "JOIN volta_postgres.public.incident i\r\n",
+        "    ON i.id = c.incident_id\r\n",
+        "JOIN volta_postgres.public.cooperative co\r\n",
+        "    ON co.id = c.cooperative_id\r\n",
+        "GROUP BY\r\n",
+        "    co.name,\r\n",
+        "    co.latitude,\r\n",
+        "    co.longitude\r\n",
+        "ORDER BY occurrence_count DESC;"
+      ]
+    },
+    {
+      "name": "eb1d8122",
+      "displayName": "ds_1906_ocorrencias_por_hora",
+      "queryLines": [
+        "SELECT\r\n",
+        "    HOUR(from_utc_timestamp(registered_at, 'America/Sao_Paulo')) AS hour_of_day,\r\n",
+        "    COUNT(*) AS occurrence_count\r\n",
+        "FROM volta_postgres.public.incident\r\n",
+        "GROUP BY HOUR(from_utc_timestamp(registered_at, 'America/Sao_Paulo'))\r\n",
+        "ORDER BY hour_of_day;"
+      ]
+    },
+    {
+      "name": "843ec8b8",
+      "displayName": "ds_1905_tempo_de_resolucao",
+      "queryLines": [
+        "WITH conclusoes AS (\r\n",
+        "    SELECT\r\n",
+        "        collection_id,\r\n",
+        "        MIN(changed_at) AS completed_at\r\n",
+        "    FROM volta_postgres.public.collection_status\r\n",
+        "    WHERE UPPER(status) IN ('COMPLETED', 'CONCLUIDA', 'FINALIZADA')\r\n",
+        "    GROUP BY collection_id\r\n",
+        ")\r\n",
+        "SELECT\r\n",
+        "    c.id AS collection_id,\r\n",
+        "    c.requested_at,\r\n",
+        "    x.completed_at,\r\n",
+        "    ROUND(\r\n",
+        "        (unix_timestamp(x.completed_at) -\r\n",
+        "         unix_timestamp(c.requested_at)) / 3600.0,\r\n",
+        "        2\r\n",
+        "    ) AS resolution_hours\r\n",
+        "FROM volta_postgres.public.collection c\r\n",
+        "JOIN conclusoes x\r\n",
+        "    ON x.collection_id = c.id\r\n",
+        "ORDER BY resolution_hours;"
+      ]
+    },
+    {
+      "name": "b3aa451e",
+      "displayName": "ds_1904_evolucao_temporal",
+      "queryLines": [
+        "SELECT\r\n",
+        "    to_date(\r\n",
+        "        from_utc_timestamp(registered_at, 'America/Sao_Paulo')\r\n",
+        "    ) AS date_key,\r\n",
+        "    COUNT(DISTINCT id) AS occurrence_count\r\n",
+        "FROM volta_postgres.public.incident\r\n",
+        "GROUP BY\r\n",
+        "    to_date(\r\n",
+        "        from_utc_timestamp(registered_at, 'America/Sao_Paulo')\r\n",
+        "    )\r\n",
+        "ORDER BY date_key;"
+      ]
+    },
+    {
+      "name": "ca358c6f",
+      "displayName": "ds_1903_ocorrencias_por_setor",
+      "queryLines": [
+        "SELECT\r\n",
+        "    a.sector_name,\r\n",
+        "    COUNT(*) AS occurrence_count\r\n",
+        "FROM volta_postgres.public.incident i\r\n",
+        "JOIN volta_postgres.public.area a\r\n",
+        "    ON a.id = i.area_id\r\n",
+        "GROUP BY a.sector_name\r\n",
+        "ORDER BY occurrence_count DESC;"
+      ]
+    },
+    {
+      "name": "59f8f17b",
+      "displayName": "operational_kpis",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gold.operational_kpis",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Representa o número total de linhas no conjunto de dados. Use essa medida para contar todos",
+            "displayName": "Contagem"
+          },
+          {
+            "name": "taxa_conclusao_pct",
+            "expr": "100.0 * SUM(source.completed_collections)\r\n      / NULLIF(SUM(source.total_collections), 0)",
+            "displayName": "Taxa de conclusão (%)"
+          },
+          {
+            "name": "resolution_hours_summ",
+            "expr": "SUM(source.resolution_hours_sum)\r\n  / NULLIF(SUM(source.resolved_collections_count), 0)",
+            "displayName": "Horas de resolucao"
+          }
+        ]
+      }
+    }
+  ],
+  "pages": [
+    {
+      "name": "7655e0a4",
+      "displayName": "Visão Geral",
+      "layout": [
+        {
+          "widget": {
+            "name": "ocorrencias",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "59f8f17b",
+                  "fields": [
+                    {
+                      "name": "sum(total_occurrences)",
+                      "expression": "SUM(`total_occurrences`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Ocorrências",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(total_occurrences)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "volume-estimado",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "59f8f17b",
+                  "fields": [
+                    {
+                      "name": "sum(estimated_quantity_kg)",
+                      "expression": "SUM(`estimated_quantity_kg`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Volume estimado (KG)",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(estimated_quantity_kg)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 1,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "coletas",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "59f8f17b",
+                  "fields": [
+                    {
+                      "name": "sum(total_collections)",
+                      "expression": "SUM(`total_collections`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Coletas",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(total_collections)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 5,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "concluidas",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "59f8f17b",
+                  "fields": [
+                    {
+                      "name": "sum(completed_collections)",
+                      "expression": "SUM(`completed_collections`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Coletas concluídas",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(completed_collections)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 5,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "taxa-de-conclusao",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "59f8f17b",
+                  "fields": [
+                    {
+                      "name": "measure(taxa_conclusao_pct)",
+                      "expression": "MEASURE(`taxa_conclusao_pct`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Taxa de conclusão (%)",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(taxa_conclusao_pct)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 1,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "tempo-medio-resolucao",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "59f8f17b",
+                  "fields": [
+                    {
+                      "name": "measure(resolution_hours_summ)",
+                      "expression": "MEASURE(`resolution_hours_summ`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Tempo médio de resolução (horas)",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(resolution_hours_summ)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 5,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "f9b0e692",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Cards de KPI"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "25d22374",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Ocorrências por setor"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 9,
+            "width": 6,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "efa9f3ce",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ca358c6f",
+                  "fields": [
+                    {
+                      "name": "sum(occurrence_count)",
+                      "expression": "SUM(`occurrence_count`)"
+                    },
+                    {
+                      "name": "sector_name",
+                      "expression": "`sector_name`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sum(occurrence_count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "sector_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 10,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "95f7c228",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Evolução Temporal"
+              ]
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 9,
+            "width": 6,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "50bb8d16",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "b3aa451e",
+                  "fields": [
+                    {
+                      "name": "date_key",
+                      "expression": "`date_key`"
+                    },
+                    {
+                      "name": "sum(occurrence_count)",
+                      "expression": "SUM(`occurrence_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "date_key",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(occurrence_count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 10,
+            "width": 6,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "163b6632",
+      "displayName": "Análise Operacional",
+      "layout": [
+        {
+          "widget": {
+            "name": "6b280585",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Tempo de resolução"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "7525cfef",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Ocorrências por hora"
+              ]
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "a6e5f684",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "843ec8b8",
+                  "fields": [
+                    {
+                      "name": "min(resolution_hours)",
+                      "expression": "MIN(`resolution_hours`)"
+                    },
+                    {
+                      "name": "q1(resolution_hours)",
+                      "expression": "PERCENTILE(`resolution_hours`, 0.25)"
+                    },
+                    {
+                      "name": "median(resolution_hours)",
+                      "expression": "MEDIAN(`resolution_hours`)"
+                    },
+                    {
+                      "name": "q3(resolution_hours)",
+                      "expression": "PERCENTILE(`resolution_hours`, 0.75)"
+                    },
+                    {
+                      "name": "max(resolution_hours)",
+                      "expression": "MAX(`resolution_hours`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "box",
+              "encodings": {
+                "y": {
+                  "whiskerStart": {
+                    "fieldName": "min(resolution_hours)"
+                  },
+                  "boxStart": {
+                    "fieldName": "q1(resolution_hours)"
+                  },
+                  "boxMid": {
+                    "fieldName": "median(resolution_hours)"
+                  },
+                  "boxEnd": {
+                    "fieldName": "q3(resolution_hours)"
+                  },
+                  "whiskerEnd": {
+                    "fieldName": "max(resolution_hours)"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "d3cb9200",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "eb1d8122",
+                  "fields": [
+                    {
+                      "name": "hour_of_day",
+                      "expression": "`hour_of_day`"
+                    },
+                    {
+                      "name": "sum(occurrence_count)",
+                      "expression": "SUM(`occurrence_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "hour_of_day",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(occurrence_count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 1,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "35eabb5b",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Mapa das cooperativas"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "0639861a",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "dc779b54",
+                  "fields": [
+                    {
+                      "name": "latitude",
+                      "expression": "`latitude`"
+                    },
+                    {
+                      "name": "longitude",
+                      "expression": "`longitude`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "symbol-map",
+              "encodings": {
+                "coordinates": {
+                  "latitude": {
+                    "fieldName": "latitude"
+                  },
+                  "longitude": {
+                    "fieldName": "longitude"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 12,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "f0d7e5de",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "periodo",
+            "queries": [
+              {
+                "name": "dashboards/01f1a6bf81d81c5c962f17a43865edcd/datasets/01f1a6c26f24168dad60d13cfa28dcc4_date_key",
+                "query": {
+                  "datasetName": "b3aa451e",
+                  "fields": [
+                    {
+                      "name": "date_key",
+                      "expression": "`date_key`"
+                    },
+                    {
+                      "name": "date_key_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1a6bf81d81c5c962f17a43865edcd/datasets/01f1a6c25d881802a02c91b3943c13a8_requested_at",
+                "query": {
+                  "datasetName": "843ec8b8",
+                  "fields": [
+                    {
+                      "name": "requested_at",
+                      "expression": "`requested_at`"
+                    },
+                    {
+                      "name": "requested_at_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Periodo",
+                  "fields": []
+                }
+              },
+              "widgetType": "filter-date-range-picker",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "date_key",
+                    "queryName": "dashboards/01f1a6bf81d81c5c962f17a43865edcd/datasets/01f1a6c26f24168dad60d13cfa28dcc4_date_key"
+                  },
+                  {
+                    "fieldName": "requested_at",
+                    "queryName": "dashboards/01f1a6bf81d81c5c962f17a43865edcd/datasets/01f1a6c25d881802a02c91b3943c13a8_requested_at"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
