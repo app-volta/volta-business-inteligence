@@ -62,6 +62,20 @@ e tempo medio de resolucao. `completed_collections` conta o status atual de
 conclusao; no Gold Databricks, `historically_completed_collections` é o
 indicador separado para conclusoes que ocorreram em algum momento.
 
+## Dashboard Databricks (SCRUM-1938)
+
+O dashboard versionado em
+`databricks/dashboard/VOLTA — Indicadores Operacionais_.lvdash.json` consome
+as seis fontes `workspace.gold.*` da pipeline. Ele reúne KPIs, análises por
+setor e período, distribuição por hora, boxplot de resolução e mapa de
+cooperativas. Os filtros globais são período, empresa, categoria do resíduo e
+setor. O mapeamento entre visuais, fontes Gold e campos de filtro está em
+[`docs/datamart.md`](docs/datamart.md#dashboard-databricks-scrum-1938).
+
+O arquivo `.lvdash.json` versiona a definição do dashboard; configuração de
+publicação e evidências de execução do Job Databricks precisam ser conferidas
+no workspace.
+
 ## Pipeline Databricks (SCRUM-1937)
 
 Os notebooks ficam em

@@ -56,6 +56,39 @@ intervalo deve completar o calendário no visual.
 Para validar a pipeline, execute-a no Databricks e confirme as saídas nas três
 camadas. O runtime Lakeflow não é validado pelo script local de SQL.
 
+## Dashboard Databricks (SCRUM-1938)
+
+O artefato versionado em
+`databricks/dashboard/VOLTA — Indicadores Operacionais_.lvdash.json` usa as
+saídas Gold da pipeline. Os visuais devem permanecer alinhados a estas fontes:
+
+| Visual | Fonte Gold |
+| --- | --- |
+| Cards de KPIs operacionais | `workspace.gold.operational_kpis` |
+| Ocorrências por setor | `workspace.gold.occurrences_by_sector` |
+| Evolução temporal | `workspace.gold.occurrences_over_time` |
+| Distribuição de ocorrências por hora | `workspace.gold.occurrences_by_hour` |
+| Boxplot do tempo de resolução | `workspace.gold.collection_resolution` |
+| Mapa das cooperativas | `workspace.gold.occurrences_by_cooperative` |
+
+Os filtros globais usam os campos correspondentes disponíveis nas fontes:
+período (`date_key`), empresa (`company_id`), categoria do resíduo
+(`waste_category`) e setor (`sector_name`). Um filtro só afeta os datasets que
+expõem o respectivo campo. Se o seletor de empresa apresentar uma única opção,
+confira a cardinalidade de `company_id` nos dados antes de tratar o caso como
+falha de configuração.
+
+A Visão Geral contém os cards de ocorrências, volume estimado, coletas,
+coletas concluídas, taxa de conclusão e tempo médio de resolução, além dos
+gráficos por setor e de evolução temporal. A página Análise Operacional contém
+o boxplot, a distribuição por hora agrupada por `hour_of_day` e o mapa. O
+mapa representa a localização da cooperativa associada à coleta; não representa
+coordenadas exatas da ocorrência ou da área industrial.
+
+O arquivo `.lvdash.json` guarda a definição exportada do dashboard, não sua
+configuração de publicação nem evidências de execução do Job. Valide a
+publicação, os filtros e a execução das consultas no workspace Databricks.
+
 ## Grao das facts
 
 | View | Grao |
@@ -91,12 +124,12 @@ cooperativas e enderecos textuais da empresa/area. Para um mapa exato de
 ocorrencias, o backend precisa registrar coordenadas ou uma chave geografica da
 planta/setor.
 
-## Evolucao prevista
+## Rotas de consumo e dashboard
 
-O próximo passo é definir qual das duas rotas será consumida por cada
-dashboard. Se a camada Gold for adotada, mantenha os consumidores alinhados ao
-contrato documentado acima e evite recalcular o mesmo KPI com uma definição
-diferente na consulta PostgreSQL.
+O dashboard Databricks descrito acima consome a camada Gold. O Data Mart
+PostgreSQL permanece disponível para consultas e consumidores SQL. Para cada
+dashboard, escolha uma rota analítica consistente e evite misturar fontes ou
+recalcular o mesmo KPI com definições diferentes.
 
 ## SCRUM-1903: grafico de barras por setor
 
