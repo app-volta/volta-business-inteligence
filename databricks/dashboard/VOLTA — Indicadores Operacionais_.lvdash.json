@@ -1,0 +1,1299 @@
+{
+  "datasets": [
+    {
+      "name": "59f8f17b",
+      "displayName": "operational_kpis",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gold.operational_kpis",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Representa o número total de linhas no conjunto de dados. Use essa medida para contar todos",
+            "displayName": "Contagem"
+          },
+          {
+            "name": "taxa_conclusao_pct",
+            "expr": "100.0 * SUM(source.completed_collections)\r\n      / NULLIF(SUM(source.total_collections), 0)",
+            "displayName": "Taxa de conclusão (%)"
+          },
+          {
+            "name": "resolution_hours_summ",
+            "expr": "SUM(source.resolution_hours_sum)\r\n  / NULLIF(SUM(source.resolved_collections_count), 0)",
+            "displayName": "Horas de resolucao"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ab65e04b",
+      "displayName": "occurrences_by_sector",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gold.occurrences_by_sector",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Representa o número total de linhas no conjunto de dados. Use essa medida para contar todos",
+            "displayName": "Contagem"
+          }
+        ]
+      }
+    },
+    {
+      "name": "3299381c",
+      "displayName": "occurrences_over_time",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gold.occurrences_over_time",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Representa o número total de linhas no conjunto de dados. Use essa medida para contar todos",
+            "displayName": "Contagem"
+          }
+        ]
+      }
+    },
+    {
+      "name": "83c4e263",
+      "displayName": "occurrences_by_hour",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gold.occurrences_by_hour",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Representa o número total de linhas no conjunto de dados. Use essa medida para contar todos",
+            "displayName": "Contagem"
+          }
+        ]
+      }
+    },
+    {
+      "name": "965b43f4",
+      "displayName": "collection_resolution",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gold.collection_resolution",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Representa o número total de linhas no conjunto de dados. Use essa medida para contar todos",
+            "displayName": "Contagem"
+          }
+        ]
+      }
+    },
+    {
+      "name": "47af5562",
+      "displayName": "occurrences_by_cooperative",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gold.occurrences_by_cooperative",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Representa o número total de linhas no conjunto de dados. Use essa medida para contar todos",
+            "displayName": "Contagem"
+          }
+        ]
+      }
+    }
+  ],
+  "pages": [
+    {
+      "name": "7655e0a4",
+      "displayName": "Visão Geral",
+      "layout": [
+        {
+          "widget": {
+            "name": "ocorrencias",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "59f8f17b",
+                  "fields": [
+                    {
+                      "name": "sum(total_occurrences)",
+                      "expression": "SUM(`total_occurrences`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Ocorrências",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(total_occurrences)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "volume-estimado",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "59f8f17b",
+                  "fields": [
+                    {
+                      "name": "sum(estimated_quantity_kg)",
+                      "expression": "SUM(`estimated_quantity_kg`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Volume estimado (KG)",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(estimated_quantity_kg)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 1,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "coletas",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "59f8f17b",
+                  "fields": [
+                    {
+                      "name": "sum(total_collections)",
+                      "expression": "SUM(`total_collections`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Coletas",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(total_collections)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 5,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "concluidas",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "59f8f17b",
+                  "fields": [
+                    {
+                      "name": "sum(completed_collections)",
+                      "expression": "SUM(`completed_collections`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Coletas concluídas",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(completed_collections)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 5,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "taxa-de-conclusao",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "59f8f17b",
+                  "fields": [
+                    {
+                      "name": "measure(taxa_conclusao_pct)",
+                      "expression": "MEASURE(`taxa_conclusao_pct`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Taxa de conclusão (%)",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(taxa_conclusao_pct)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 1,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "tempo-medio-resolucao",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "59f8f17b",
+                  "fields": [
+                    {
+                      "name": "measure(resolution_hours_summ)",
+                      "expression": "MEASURE(`resolution_hours_summ`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Tempo médio de resolução (horas)",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(resolution_hours_summ)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 5,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "f9b0e692",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Cards de KPI"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "25d22374",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Ocorrências por setor"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 9,
+            "width": 6,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "efa9f3ce",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ab65e04b",
+                  "fields": [
+                    {
+                      "name": "sector_name",
+                      "expression": "`sector_name`"
+                    },
+                    {
+                      "name": "sum(occurrence_count)",
+                      "expression": "SUM(`occurrence_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sector_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(occurrence_count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 10,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "95f7c228",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Evolução Temporal"
+              ]
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 9,
+            "width": 6,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "50bb8d16",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "3299381c",
+                  "fields": [
+                    {
+                      "name": "date_key",
+                      "expression": "`date_key`"
+                    },
+                    {
+                      "name": "sum(occurrence_count)",
+                      "expression": "SUM(`occurrence_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "date_key",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(occurrence_count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 10,
+            "width": 6,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "163b6632",
+      "displayName": "Análise Operacional",
+      "layout": [
+        {
+          "widget": {
+            "name": "6b280585",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Tempo de resolução"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "7525cfef",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Ocorrências por hora"
+              ]
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "a6e5f684",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "965b43f4",
+                  "fields": [
+                    {
+                      "name": "min(resolution_time_hours)",
+                      "expression": "MIN(`resolution_time_hours`)"
+                    },
+                    {
+                      "name": "q1(resolution_time_hours)",
+                      "expression": "PERCENTILE(`resolution_time_hours`, 0.25)"
+                    },
+                    {
+                      "name": "median(resolution_time_hours)",
+                      "expression": "MEDIAN(`resolution_time_hours`)"
+                    },
+                    {
+                      "name": "q3(resolution_time_hours)",
+                      "expression": "PERCENTILE(`resolution_time_hours`, 0.75)"
+                    },
+                    {
+                      "name": "max(resolution_time_hours)",
+                      "expression": "MAX(`resolution_time_hours`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "box",
+              "encodings": {
+                "y": {
+                  "whiskerStart": {
+                    "fieldName": "min(resolution_time_hours)"
+                  },
+                  "boxStart": {
+                    "fieldName": "q1(resolution_time_hours)"
+                  },
+                  "boxMid": {
+                    "fieldName": "median(resolution_time_hours)"
+                  },
+                  "boxEnd": {
+                    "fieldName": "q3(resolution_time_hours)"
+                  },
+                  "whiskerEnd": {
+                    "fieldName": "max(resolution_time_hours)"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "d3cb9200",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "83c4e263",
+                  "fields": [
+                    {
+                      "name": "hour_of_day",
+                      "expression": "`hour_of_day`"
+                    },
+                    {
+                      "name": "sum(occurrence_count)",
+                      "expression": "SUM(`occurrence_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "hour_of_day",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(occurrence_count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 1,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "35eabb5b",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Mapa das cooperativas"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "0639861a",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "47af5562",
+                  "fields": [
+                    {
+                      "name": "latitude",
+                      "expression": "`latitude`"
+                    },
+                    {
+                      "name": "longitude",
+                      "expression": "`longitude`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "symbol-map",
+              "encodings": {
+                "coordinates": {
+                  "latitude": {
+                    "fieldName": "latitude"
+                  },
+                  "longitude": {
+                    "fieldName": "longitude"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 12,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "f0d7e5de",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "periodo",
+            "queries": [
+              {
+                "name": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b81e96e6180882cbde8c779c4c71_date_key",
+                "query": {
+                  "datasetName": "59f8f17b",
+                  "fields": [
+                    {
+                      "name": "date_key",
+                      "expression": "`date_key`"
+                    },
+                    {
+                      "name": "date_key_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d6a3a81cad89290ed2274075ce_date_key",
+                "query": {
+                  "datasetName": "ab65e04b",
+                  "fields": [
+                    {
+                      "name": "date_key",
+                      "expression": "`date_key`"
+                    },
+                    {
+                      "name": "date_key_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d7747716558ffcd592242b055e_date_key",
+                "query": {
+                  "datasetName": "3299381c",
+                  "fields": [
+                    {
+                      "name": "date_key",
+                      "expression": "`date_key`"
+                    },
+                    {
+                      "name": "date_key_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d8464a1711ace1acb109aa1a96_date_key",
+                "query": {
+                  "datasetName": "83c4e263",
+                  "fields": [
+                    {
+                      "name": "date_key",
+                      "expression": "`date_key`"
+                    },
+                    {
+                      "name": "date_key_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d8632a1b03878c888b2cb77fa3_date_key",
+                "query": {
+                  "datasetName": "965b43f4",
+                  "fields": [
+                    {
+                      "name": "date_key",
+                      "expression": "`date_key`"
+                    },
+                    {
+                      "name": "date_key_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d8f6981312b097713a6fd79fe1_date_key",
+                "query": {
+                  "datasetName": "47af5562",
+                  "fields": [
+                    {
+                      "name": "date_key",
+                      "expression": "`date_key`"
+                    },
+                    {
+                      "name": "date_key_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Periodo",
+                  "fields": []
+                }
+              },
+              "widgetType": "filter-date-range-picker",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "date_key",
+                    "queryName": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b81e96e6180882cbde8c779c4c71_date_key"
+                  },
+                  {
+                    "fieldName": "date_key",
+                    "queryName": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d6a3a81cad89290ed2274075ce_date_key"
+                  },
+                  {
+                    "fieldName": "date_key",
+                    "queryName": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d7747716558ffcd592242b055e_date_key"
+                  },
+                  {
+                    "fieldName": "date_key",
+                    "queryName": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d8464a1711ace1acb109aa1a96_date_key"
+                  },
+                  {
+                    "fieldName": "date_key",
+                    "queryName": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d8632a1b03878c888b2cb77fa3_date_key"
+                  },
+                  {
+                    "fieldName": "date_key",
+                    "queryName": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d8f6981312b097713a6fd79fe1_date_key"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "empresa",
+            "queries": [
+              {
+                "name": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b81e96e6180882cbde8c779c4c71_company_id",
+                "query": {
+                  "datasetName": "59f8f17b",
+                  "fields": [
+                    {
+                      "name": "company_id",
+                      "expression": "`company_id`"
+                    },
+                    {
+                      "name": "company_id_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d8f6981312b097713a6fd79fe1_company_id",
+                "query": {
+                  "datasetName": "47af5562",
+                  "fields": [
+                    {
+                      "name": "company_id",
+                      "expression": "`company_id`"
+                    },
+                    {
+                      "name": "company_id_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d8632a1b03878c888b2cb77fa3_company_id",
+                "query": {
+                  "datasetName": "965b43f4",
+                  "fields": [
+                    {
+                      "name": "company_id",
+                      "expression": "`company_id`"
+                    },
+                    {
+                      "name": "company_id_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d8464a1711ace1acb109aa1a96_company_id",
+                "query": {
+                  "datasetName": "83c4e263",
+                  "fields": [
+                    {
+                      "name": "company_id",
+                      "expression": "`company_id`"
+                    },
+                    {
+                      "name": "company_id_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d7747716558ffcd592242b055e_company_id",
+                "query": {
+                  "datasetName": "3299381c",
+                  "fields": [
+                    {
+                      "name": "company_id",
+                      "expression": "`company_id`"
+                    },
+                    {
+                      "name": "company_id_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d6a3a81cad89290ed2274075ce_company_id",
+                "query": {
+                  "datasetName": "ab65e04b",
+                  "fields": [
+                    {
+                      "name": "company_id",
+                      "expression": "`company_id`"
+                    },
+                    {
+                      "name": "company_id_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Empresa",
+                  "fields": []
+                }
+              },
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "company_id",
+                    "queryName": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b81e96e6180882cbde8c779c4c71_company_id"
+                  },
+                  {
+                    "fieldName": "company_id",
+                    "queryName": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d8f6981312b097713a6fd79fe1_company_id"
+                  },
+                  {
+                    "fieldName": "company_id",
+                    "queryName": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d8632a1b03878c888b2cb77fa3_company_id"
+                  },
+                  {
+                    "fieldName": "company_id",
+                    "queryName": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d8464a1711ace1acb109aa1a96_company_id"
+                  },
+                  {
+                    "fieldName": "company_id",
+                    "queryName": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d7747716558ffcd592242b055e_company_id"
+                  },
+                  {
+                    "fieldName": "company_id",
+                    "queryName": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d6a3a81cad89290ed2274075ce_company_id"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 1,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "categoria-do-residuo",
+            "queries": [
+              {
+                "name": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d6a3a81cad89290ed2274075ce_waste_category",
+                "query": {
+                  "datasetName": "ab65e04b",
+                  "fields": [
+                    {
+                      "name": "waste_category",
+                      "expression": "`waste_category`"
+                    },
+                    {
+                      "name": "waste_category_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d7747716558ffcd592242b055e_waste_category",
+                "query": {
+                  "datasetName": "3299381c",
+                  "fields": [
+                    {
+                      "name": "waste_category",
+                      "expression": "`waste_category`"
+                    },
+                    {
+                      "name": "waste_category_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d8464a1711ace1acb109aa1a96_waste_category",
+                "query": {
+                  "datasetName": "83c4e263",
+                  "fields": [
+                    {
+                      "name": "waste_category",
+                      "expression": "`waste_category`"
+                    },
+                    {
+                      "name": "waste_category_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d8632a1b03878c888b2cb77fa3_waste_category",
+                "query": {
+                  "datasetName": "965b43f4",
+                  "fields": [
+                    {
+                      "name": "waste_category",
+                      "expression": "`waste_category`"
+                    },
+                    {
+                      "name": "waste_category_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Categoria do resíduo",
+                  "fields": []
+                }
+              },
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "waste_category",
+                    "queryName": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d6a3a81cad89290ed2274075ce_waste_category"
+                  },
+                  {
+                    "fieldName": "waste_category",
+                    "queryName": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d7747716558ffcd592242b055e_waste_category"
+                  },
+                  {
+                    "fieldName": "waste_category",
+                    "queryName": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d8464a1711ace1acb109aa1a96_waste_category"
+                  },
+                  {
+                    "fieldName": "waste_category",
+                    "queryName": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d8632a1b03878c888b2cb77fa3_waste_category"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 1,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "setor",
+            "queries": [
+              {
+                "name": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d6a3a81cad89290ed2274075ce_sector_name",
+                "query": {
+                  "datasetName": "ab65e04b",
+                  "fields": [
+                    {
+                      "name": "sector_name",
+                      "expression": "`sector_name`"
+                    },
+                    {
+                      "name": "sector_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d8632a1b03878c888b2cb77fa3_sector_name",
+                "query": {
+                  "datasetName": "965b43f4",
+                  "fields": [
+                    {
+                      "name": "sector_name",
+                      "expression": "`sector_name`"
+                    },
+                    {
+                      "name": "sector_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Setor",
+                  "fields": []
+                }
+              },
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "sector_name",
+                    "queryName": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d6a3a81cad89290ed2274075ce_sector_name"
+                  },
+                  {
+                    "fieldName": "sector_name",
+                    "queryName": "dashboards/01f1b81e96e51f2cb76e06a588b73b6b/datasets/01f1b8d8632a1b03878c888b2cb77fa3_sector_name"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 1,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
