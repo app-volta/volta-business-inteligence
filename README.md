@@ -74,7 +74,14 @@ setor. O mapeamento entre visuais, fontes Gold e campos de filtro está em
 
 O arquivo `.lvdash.json` versiona a definição do dashboard; configuração de
 publicação e evidências de execução do Job Databricks precisam ser conferidas
-no workspace.
+no workspace. A definição do Job está em
+`databricks/resources/volta_pipeline_job.yml`, como recurso de um Declarative
+Automation Bundle cuja configuração fica em `databricks/databricks.yml`. O
+Bundle resolve a pipeline pelo nome no workspace selecionado. A configuração
+representa o Job já criado manualmente; antes do primeiro deploy, autentique o
+Databricks CLI no workspace correto, vincule o recurso ao Job existente e
+revise o plano para evitar criar um duplicado. A vinculação e o deploy não
+foram executados neste checkpoint.
 
 ## Pipeline Databricks (SCRUM-1937)
 

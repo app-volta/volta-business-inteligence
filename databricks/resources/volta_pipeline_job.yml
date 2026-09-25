@@ -1,0 +1,12 @@
+resources:
+  jobs:
+    volta_atualizacao_pipeline_bi:
+      name: VOLTA - Atualização da Pipeline BI
+      tasks:
+        - task_key: executar_pipeline_volta_bi
+          pipeline_task:
+            pipeline_id: ${var.pipeline_id}
+            full_refresh: false
+      queue:
+        enabled: true
+      performance_target: PERFORMANCE_OPTIMIZED
