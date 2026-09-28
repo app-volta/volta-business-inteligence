@@ -152,3 +152,11 @@ powershell -ExecutionPolicy Bypass -File scripts/validate_sql.ps1
 Essa validacao confere propriedades basicas do SQL versionado antes de abrir PR.
 Os notebooks dependem do runtime do Databricks e devem ser validados executando
 a pipeline no workspace.
+
+Para reconciliar os cards e a distribuicao por hora com calculos feitos a partir
+das tabelas de detalhe Silver, execute
+[`sql/validation/validate_dashboard_gold.sql`](sql/validation/validate_dashboard_gold.sql)
+no Databricks SQL Editor. O resultado desta conferencia esta em
+[`docs/validacao_dashboard_gold.md`](docs/validacao_dashboard_gold.md). O
+workflow `.github/workflows/bi-quality.yml` valida estaticamente o JSON do
+dashboard e os contratos SQL; nao acessa o workspace nem executa a pipeline.

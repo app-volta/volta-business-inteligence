@@ -1,0 +1,45 @@
+name: BI quality checks
+
+on:
+  pull_request:
+    branches: [develop]
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-pr:
+    uses: app-volta/volta-devops/.github/workflows/reusable-validate-pr.yaml@main
+
+  validate:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate dashboard contract
+        shell: pwsh
+        run: |
+          $dashboardPath = 'databricks/dashboard/VOLTA — Indicadores Operacionais_.lvdash.json'
+          $dashboard = Get-Content -Raw $dashboardPath | ConvertFrom-Json
+          $datasets = @($dashboard.datasets)
+          if ($datasets.Count -ne 6) { throw "Expected 6 dashboard datasets; found $($datasets.Count)." }
+          foreach ($dataset in $datasets) {
+            if (-not $dataset.config.source.StartsWith('workspace.gold.')) {
+              throw "Dataset '$($dataset.displayName)' does not use a Gold source."
+            }
+          }
+          $hourDataset = @($datasets | Where-Object displayName -eq 'occurrences_by_hour')
+          if ($hourDataset.Count -ne 1) { throw 'Expected one occurrences_by_hour dataset.' }
+          $widgets = @($dashboard.pages | ForEach-Object layout | ForEach-Object widget)
+          $histograms = @($widgets | Where-Object { $_.spec.widgetType -eq 'histogram' })
+          if ($histograms.Count -ne 1) { throw "Expected one histogram widget; found $($histograms.Count)." }
+          $histogramDataset = $histograms[0].queries[0].query.datasetName
+          if ($histogramDataset -ne $hourDataset[0].name) { throw 'Histogram is not bound to occurrences_by_hour.' }
+          Write-Host 'OK: dashboard JSON, Gold sources, and hourly histogram contract valid.'
+
+      - name: Validate SQL contracts
+        shell: pwsh
+        run: ./scripts/validate_sql.ps1
