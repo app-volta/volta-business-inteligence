@@ -11,6 +11,9 @@ permissions:
   contents: read
 
 jobs:
+  validate-pr:
+    uses: app-volta/volta-devops/.github/workflows/reusable-validate-pr.yaml@main
+
   validate:
     runs-on: windows-latest
     steps:
