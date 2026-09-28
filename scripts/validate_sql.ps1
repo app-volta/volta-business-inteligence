@@ -14,6 +14,8 @@ $query1907Path = Join-Path $PSScriptRoot "..\sql\queries\1907_occurrences_map.sq
 $query1907 = Get-Content -Raw $query1907Path
 $query1908Path = Join-Path $PSScriptRoot "..\sql\queries\1908_operational_kpis.sql"
 $query1908 = Get-Content -Raw $query1908Path
+$goldValidationPath = Join-Path $PSScriptRoot "..\sql\validation\validate_dashboard_gold.sql"
+$goldValidation = Get-Content -Raw $goldValidationPath
 
 $required = @(
     "CREATE SCHEMA IF NOT EXISTS bi",
@@ -117,4 +119,18 @@ foreach ($needle in @(
     }
 }
 
+foreach ($needle in @(
+    "FROM workspace.silver.occurrence_clean",
+    "FROM workspace.silver.collection_clean",
+    "FROM workspace.gold.operational_kpis",
+    "FROM workspace.gold.occurrences_by_hour",
+    "FULL OUTER JOIN hour_gold",
+    "DIVERGENCE"
+)) {
+    if (-not $goldValidation.Contains($needle)) {
+        throw "Consulta de reconciliacao Gold invalida: $needle"
+    }
+}
+
 Write-Host "OK: Data Mart SQL validado."
+Write-Host "OK: Consulta de reconciliacao Silver/Gold validada estruturalmente."
