@@ -11,6 +11,9 @@
 - Consulta reproduzível:
   [`sql/validation/validate_dashboard_gold.sql`](../sql/validation/validate_dashboard_gold.sql)
 
+O critério da consulta é diferença absoluta inferior a `0,000001`; os valores
+abaixo são apresentados na precisão registrada para os cards do dashboard.
+
 ## Resultado
 
 As seis métricas dos cards tiveram diferença zero entre o cálculo sobre Silver

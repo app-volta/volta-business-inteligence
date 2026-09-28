@@ -10,7 +10,7 @@ collection_kpi AS (
     SELECT
         COUNT(DISTINCT collection_id) AS total_collections,
         COUNT(DISTINCT CASE
-            WHEN UPPER(current_status) IN (
+            WHEN UPPER(BTRIM(current_status)) IN (
                 'COMPLETED',
                 'DONE',
                 'COLLECTED',

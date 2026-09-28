@@ -39,6 +39,35 @@ foreach ($needle in $required) {
     }
 }
 
+foreach ($needle in @(
+    "WHERE UPPER(BTRIM(cs.status)) IN (",
+    "AND cs.changed_at >= c.requested_at",
+    "GROUP BY cs.collection_id, c.requested_at",
+    "em.period ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'",
+    "registered_at AT TIME ZONE 'UTC'",
+    "requested_at AT TIME ZONE 'UTC'",
+    "scheduled_at AT TIME ZONE 'UTC'",
+    "calculated_at AT TIME ZONE 'UTC'",
+    "reviewed_at AT TIME ZONE 'UTC'",
+    "AND da.company_id = fi.company_id",
+    "AND da.company_id = fc.company_id"
+)) {
+    if (-not $sql.Contains($needle)) {
+        throw "Contrato do Data Mart nao encontrado: $needle"
+    }
+}
+
+if ([regex]::Matches($sql, "LEFT JOIN bi\.dim_area da").Count -ne 2) {
+    throw "As duas facts de BI devem preservar linhas com area_id inconsistente."
+}
+
+$completionStatuses = @('COMPLETED', 'DONE', 'COLLECTED', 'CONCLUIDA', 'FINALIZADA', 'COLETADA')
+foreach ($status in $completionStatuses) {
+    if (-not $sql.Contains("'$status'") -or -not $query1908.Contains("'$status'")) {
+        throw "Status de conclusao inconsistente entre Data Mart e KPI: $status"
+    }
+}
+
 $openParens = ([regex]::Matches($sql, "\(")).Count
 $closeParens = ([regex]::Matches($sql, "\)")).Count
 
@@ -109,6 +138,7 @@ foreach ($needle in @(
 foreach ($needle in @(
     "FROM bi.mart_occurrences_dashboard",
     "FROM bi.mart_collection_performance",
+    "UPPER(BTRIM(current_status)) IN (",
     "total_occurrences",
     "total_collections",
     "completion_rate_pct",

@@ -34,7 +34,9 @@ Ele cria o schema `bi` e as views:
 
 Essas views atendem a base dos tickets de BI: ocorrencias por setor, evolucao
 temporal, tempo de resolucao, histograma por hora, mapa geografico, cards de
-KPI, filtros e drill-down.
+KPI e filtros. Embora `bi.fact_incident` tenha uma linha por ocorrencia e a
+Gold `collection_resolution` preserve o grao de coleta, o dashboard nao
+implementa navegacao para o detalhe individual de ocorrencias por drill-down.
 
 Para o grafico de barras do SCRUM-1903, use a consulta em
 `sql/queries/1903_occurrences_by_sector.sql` sobre
@@ -93,7 +95,8 @@ Os notebooks ficam em
 
 - `01_bronze_volta.ipynb`: recortes das tabelas de origem;
 - `02_silver_volta.ipynb`: tipagem, limpeza e datas locais;
-- `03_gold_volta.ipynb`: dimensões enriquecidas e agregações para dashboard.
+- `03_gold_volta.ipynb`: dimensões enriquecidas, agregações de indicadores e
+  resolução no grão de coleta para o dashboard.
 
 A origem é o catálogo `volta_postgres`, schema `public`. As saídas usam nomes
 totalmente qualificados no catálogo `workspace`, schemas `bronze`, `silver` e
@@ -119,8 +122,9 @@ completar o calendário no visual.
 O [relatório gerencial em PDF](docs/relatorio_gerencial/Relatorio_Gerencial_VOLTA_ABNT.pdf)
 documenta a arquitetura, os indicadores, os testes dos filtros, as limitações
 e as evidências de execução observadas entre 25 e 27 de setembro de 2026.
-Os valores apresentados são retratos desse período, não uma validação contínua
-da base ou do dashboard publicado.
+O adendo ao final registra a reconciliação Silver–Gold realizada em 28/09/2026.
+Os resultados continuam sendo retratos datados, não uma validação contínua da
+base nem do dashboard publicado.
 
 ## Como aplicar
 
@@ -160,3 +164,9 @@ no Databricks SQL Editor. O resultado desta conferencia esta em
 [`docs/validacao_dashboard_gold.md`](docs/validacao_dashboard_gold.md). O
 workflow `.github/workflows/bi-quality.yml` valida estaticamente o JSON do
 dashboard e os contratos SQL; nao acessa o workspace nem executa a pipeline.
+Ele roda em PRs para `develop`/`main`, inclusive quando reabertos, sincronizados
+ou editados. A promoção `develop` → `main` tem validação local específica porque
+o workflow reutilizável da organização exige branch no formato `tipo/SCRUM-n`.
+Para tornar a política e a qualidade obrigatórias, configure os checks
+agregados `validate-pr` e `validate` nas regras de proteção do GitHub; sem isso,
+eles informam o resultado, mas não bloqueiam merge.
