@@ -114,6 +114,14 @@ e a última data observada por empresa, para cada combinação de dimensões
 observada. Para filtros temporais além desse intervalo, o dashboard deve
 completar o calendário no visual.
 
+## Relatório gerencial
+
+O [relatório gerencial em PDF](docs/relatorio_gerencial/Relatorio_Gerencial_VOLTA_ABNT.pdf)
+documenta a arquitetura, os indicadores, os testes dos filtros, as limitações
+e as evidências de execução observadas entre 25 e 27 de setembro de 2026.
+Os valores apresentados são retratos desse período, não uma validação contínua
+da base ou do dashboard publicado.
+
 ## Como aplicar
 
 1. Configure a string do PostgreSQL remoto:
