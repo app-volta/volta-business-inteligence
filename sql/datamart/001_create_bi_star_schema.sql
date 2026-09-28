@@ -41,15 +41,26 @@ WITH date_bounds AS (
         MIN(source_date)::date AS first_date,
         MAX(source_date)::date AS last_date
     FROM (
-        SELECT registered_at AS source_date FROM public.incident
+        SELECT ((registered_at AT TIME ZONE 'UTC')
+            AT TIME ZONE 'America/Sao_Paulo')::date AS source_date
+        FROM public.incident
         UNION ALL
-        SELECT requested_at FROM public.collection
+        SELECT ((requested_at AT TIME ZONE 'UTC')
+            AT TIME ZONE 'America/Sao_Paulo')::date
+        FROM public.collection
         UNION ALL
-        SELECT scheduled_at FROM public.collection WHERE scheduled_at IS NOT NULL
+        SELECT ((scheduled_at AT TIME ZONE 'UTC')
+            AT TIME ZONE 'America/Sao_Paulo')::date
+        FROM public.collection
+        WHERE scheduled_at IS NOT NULL
         UNION ALL
-        SELECT calculated_at FROM public.esg_metric
+        SELECT ((calculated_at AT TIME ZONE 'UTC')
+            AT TIME ZONE 'America/Sao_Paulo')::date
+        FROM public.esg_metric
         UNION ALL
-        SELECT reviewed_at FROM public.review
+        SELECT ((reviewed_at AT TIME ZONE 'UTC')
+            AT TIME ZONE 'America/Sao_Paulo')::date
+        FROM public.review
     ) dates
 ),
 calendar AS (
@@ -77,8 +88,12 @@ SELECT
     i.user_id,
     i.area_id,
     i.waste_type_id,
-    i.registered_at::date AS date_key,
-    EXTRACT(HOUR FROM i.registered_at)::int AS registered_hour,
+    ((i.registered_at AT TIME ZONE 'UTC')
+        AT TIME ZONE 'America/Sao_Paulo')::date AS date_key,
+    EXTRACT(
+        HOUR FROM ((i.registered_at AT TIME ZONE 'UTC')
+            AT TIME ZONE 'America/Sao_Paulo')
+    )::int AS registered_hour,
     i.registered_at,
     i.contamination_level,
     i.estimated_quantity AS estimated_quantity_kg,
@@ -108,16 +123,20 @@ WITH status_rollup AS (
         cs.collection_id,
         MAX(cs.changed_at) AS last_status_at,
         MIN(cs.changed_at) FILTER (
-            WHERE UPPER(cs.status) IN (
+            WHERE UPPER(BTRIM(cs.status)) IN (
                 'CONCLUIDA',
                 'FINALIZADA',
                 'COLETADA',
                 'COMPLETED',
+                'COLLECTED',
                 'DONE'
             )
+            AND cs.changed_at >= c.requested_at
         ) AS completed_at
     FROM public.collection_status cs
-    GROUP BY cs.collection_id
+    JOIN public.collection c
+        ON c.id = cs.collection_id
+    GROUP BY cs.collection_id, c.requested_at
 )
 SELECT
     c.id AS collection_id,
@@ -126,8 +145,10 @@ SELECT
     i.area_id,
     i.waste_type_id,
     c.cooperative_id,
-    c.requested_at::date AS requested_date_key,
-    c.scheduled_at::date AS scheduled_date_key,
+    ((c.requested_at AT TIME ZONE 'UTC')
+        AT TIME ZONE 'America/Sao_Paulo')::date AS requested_date_key,
+    ((c.scheduled_at AT TIME ZONE 'UTC')
+        AT TIME ZONE 'America/Sao_Paulo')::date AS scheduled_date_key,
     c.requested_at,
     c.scheduled_at,
     sr.completed_at,
@@ -158,9 +179,10 @@ SELECT
     em.total_recycled_kg,
     em.recycling_percentage,
     em.calculated_at,
-    em.calculated_at::date AS calculated_date_key,
+    ((em.calculated_at AT TIME ZONE 'UTC')
+        AT TIME ZONE 'America/Sao_Paulo')::date AS calculated_date_key,
     CASE
-        WHEN em.period ~ '^\\d{4}-\\d{2}$'
+        WHEN em.period ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'
         THEN to_date(em.period || '-01', 'YYYY-MM-DD')
         ELSE NULL
     END AS period_date
@@ -177,7 +199,8 @@ SELECT
     r.stars,
     r.comment,
     r.reviewed_at,
-    r.reviewed_at::date AS reviewed_date_key
+    ((r.reviewed_at AT TIME ZONE 'UTC')
+        AT TIME ZONE 'America/Sao_Paulo')::date AS reviewed_date_key
 FROM public.review r
 JOIN public.collection c
     ON c.id = r.collection_id
@@ -210,8 +233,9 @@ SELECT
 FROM bi.fact_incident fi
 JOIN bi.dim_company dc
     ON dc.company_id = fi.company_id
-JOIN bi.dim_area da
+LEFT JOIN bi.dim_area da
     ON da.area_id = fi.area_id
+    AND da.company_id = fi.company_id
 LEFT JOIN bi.dim_waste_type dwt
     ON dwt.waste_type_id = fi.waste_type_id
 LEFT JOIN bi.dim_date dd
@@ -248,8 +272,9 @@ SELECT
 FROM bi.fact_collection fc
 JOIN bi.dim_company dc
     ON dc.company_id = fc.company_id
-JOIN bi.dim_area da
+LEFT JOIN bi.dim_area da
     ON da.area_id = fc.area_id
+    AND da.company_id = fc.company_id
 LEFT JOIN bi.dim_waste_type dwt
     ON dwt.waste_type_id = fc.waste_type_id
 JOIN bi.dim_cooperative dco

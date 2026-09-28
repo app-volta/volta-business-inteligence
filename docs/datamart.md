@@ -23,7 +23,7 @@ Os notebooks versionados em
 | --- | --- |
 | Bronze | Recortes das tabelas `public` necessárias aos indicadores |
 | Silver | Chaves tipadas, texto normalizado, datas locais e status de coleta |
-| Gold | Agregações de ocorrências, coletas, cooperativas e KPIs operacionais |
+| Gold | Agregações de ocorrências, cooperativas e KPIs, mais `collection_resolution` no grão de coleta |
 
 A origem configurada é `volta_postgres.public`. As saídas são explicitamente
 qualificadas como `workspace.bronze.*`, `workspace.silver.*` e
@@ -45,6 +45,18 @@ os identificadores qualificados.
 
 Os status reconhecidos para conclusão histórica incluem `COMPLETED`, `DONE`,
 `COLLECTED`, `CONCLUIDA`, `FINALIZADA` e `COLETADA`.
+
+No Data Mart PostgreSQL, os status históricos são comparados sem espaços nas
+extremidades e sem distinção entre maiúsculas e minúsculas. O primeiro evento
+de conclusão só é considerado se ocorrer em ou após `requested_at`, evitando
+durações negativas. O período ESG aceita apenas `YYYY-MM` com mês entre `01`
+e `12`. Embora `bi.fact_incident` tenha uma linha por ocorrência e a Gold
+`collection_resolution` preserve o grão de coleta, o dashboard não implementa
+navegação para o detalhe individual de ocorrências por drill-down.
+
+As chaves de data do Data Mart convertem os horários UTC para
+`America/Sao_Paulo` antes de extrair a data, de forma alinhada à data e à hora
+locais produzidas na camada Silver.
 
 Os joins de área preservam `company_id` além de `area_id`, evitando associar
 um setor de outra empresa em caso de inconsistência na origem; uma divergência
