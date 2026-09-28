@@ -72,9 +72,19 @@ cooperativas. Os filtros globais são período, empresa, categoria do resíduo e
 setor. O mapeamento entre visuais, fontes Gold e campos de filtro está em
 [`docs/datamart.md`](docs/datamart.md#dashboard-databricks-scrum-1938).
 
-O arquivo `.lvdash.json` versiona a definição do dashboard; configuração de
-publicação e evidências de execução do Job Databricks precisam ser conferidas
-no workspace.
+O arquivo `.lvdash.json` versiona a definição do dashboard; sua publicação
+deve ser conferida separadamente no workspace. A definição do Job está em
+`databricks/resources/volta_pipeline_job.yml`, como recurso de um Declarative
+Automation Bundle cuja configuração fica em `databricks/databricks.yml`. O
+Bundle resolve a pipeline pelo nome no workspace selecionado.
+
+No workspace de desenvolvimento deste projeto, o recurso foi vinculado ao Job
+já existente antes do deploy. O deploy concluiu com zero recursos criados e um
+atualizado; uma execução manual posterior do Job foi bem-sucedida. Em outro
+workspace, autentique o Databricks CLI, confirme a pipeline, vincule o recurso
+ao Job correspondente e revise o plano antes do primeiro deploy para evitar
+criar um Job duplicado. O deploy do Bundle configura o Job, mas não publica o
+dashboard `.lvdash.json`.
 
 ## Pipeline Databricks (SCRUM-1937)
 
@@ -103,6 +113,14 @@ seja posterior à solicitação; essa condição vale apenas para a duração.
 e a última data observada por empresa, para cada combinação de dimensões
 observada. Para filtros temporais além desse intervalo, o dashboard deve
 completar o calendário no visual.
+
+## Relatório gerencial
+
+O [relatório gerencial em PDF](docs/relatorio_gerencial/Relatorio_Gerencial_VOLTA_ABNT.pdf)
+documenta a arquitetura, os indicadores, os testes dos filtros, as limitações
+e as evidências de execução observadas entre 25 e 27 de setembro de 2026.
+Os valores apresentados são retratos desse período, não uma validação contínua
+da base ou do dashboard publicado.
 
 ## Como aplicar
 

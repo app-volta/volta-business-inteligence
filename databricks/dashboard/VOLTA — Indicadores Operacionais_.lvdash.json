@@ -697,7 +697,7 @@
             ],
             "spec": {
               "version": 3,
-              "widgetType": "bar",
+              "widgetType": "histogram",
               "encodings": {
                 "x": {
                   "fieldName": "hour_of_day",

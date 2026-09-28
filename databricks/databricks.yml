@@ -1,0 +1,18 @@
+bundle:
+  name: volta_business_intelligence
+
+include:
+  - resources/*.yml
+
+variables:
+  pipeline_id:
+    description: Pipeline Lakeflow existente neste workspace
+    lookup:
+      pipeline: 'VOLTA - Pipeline BI'
+
+targets:
+  dev:
+    default: true
+
+# O Job ja existe no workspace. Vincule o recurso ao Job antes do primeiro
+# deploy; sem o vinculo, o bundle podera criar um segundo Job.
