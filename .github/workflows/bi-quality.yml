@@ -1,0 +1,88 @@
+name: BI quality checks
+
+on:
+  pull_request:
+    branches: [develop, main]
+    types: [opened, synchronize, reopened, edited]
+  push:
+    branches: [develop, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-pr-organization:
+    if: github.head_ref != 'develop' || github.base_ref != 'main' || github.event.pull_request.head.repo.full_name != github.repository
+    uses: app-volta/volta-devops/.github/workflows/reusable-validate-pr.yaml@main
+
+  validate-pr-promotion:
+    if: github.event_name == 'pull_request' && github.head_ref == 'develop' && github.base_ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate develop-to-main promotion
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if [[ "$HEAD_REF" != "develop" || "$BASE_REF" != "main" ]]; then
+            echo "::error::A promoção deve ser de develop para main."
+            exit 1
+          fi
+          TITLE_PATTERN='^(feat|fix|refactor|chore|test|docs)(\([a-z0-9.-]+\))?: .+'
+          if [[ ! "$PR_TITLE" =~ $TITLE_PATTERN ]]; then
+            echo "::error::Título do PR fora do padrão Conventional Commits."
+            exit 1
+          fi
+          echo "Promoção develop -> main e título do PR válidos."
+
+  validate-pr:
+    if: always() && github.event_name == 'pull_request'
+    needs: [validate-pr-organization, validate-pr-promotion]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require the applicable PR policy check
+        env:
+          ORGANIZATION_CHECK: ${{ needs.validate-pr-organization.result }}
+          PROMOTION_CHECK: ${{ needs.validate-pr-promotion.result }}
+        run: |
+          if [[ "$ORGANIZATION_CHECK" == "success" && "$PROMOTION_CHECK" == "skipped" ]] \
+            || [[ "$ORGANIZATION_CHECK" == "skipped" && "$PROMOTION_CHECK" == "success" ]]; then
+            echo "Applicable PR policy check passed."
+            exit 0
+          fi
+          echo "::error::The applicable PR policy check did not pass."
+          echo "Organization validator: $ORGANIZATION_CHECK"
+          echo "develop-to-main validator: $PROMOTION_CHECK"
+          exit 1
+
+  validate:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate dashboard contract
+        shell: pwsh
+        run: |
+          $dashboardPath = 'databricks/dashboard/VOLTA — Indicadores Operacionais_.lvdash.json'
+          $dashboard = Get-Content -Raw $dashboardPath | ConvertFrom-Json
+          $datasets = @($dashboard.datasets)
+          if ($datasets.Count -ne 6) { throw "Expected 6 dashboard datasets; found $($datasets.Count)." }
+          foreach ($dataset in $datasets) {
+            if (-not $dataset.config.source.StartsWith('workspace.gold.')) {
+              throw "Dataset '$($dataset.displayName)' does not use a Gold source."
+            }
+          }
+          $hourDataset = @($datasets | Where-Object displayName -eq 'occurrences_by_hour')
+          if ($hourDataset.Count -ne 1) { throw 'Expected one occurrences_by_hour dataset.' }
+          $widgets = @($dashboard.pages | ForEach-Object layout | ForEach-Object widget)
+          $histograms = @($widgets | Where-Object { $_.spec.widgetType -eq 'histogram' })
+          if ($histograms.Count -ne 1) { throw "Expected one histogram widget; found $($histograms.Count)." }
+          $histogramDataset = $histograms[0].queries[0].query.datasetName
+          if ($histogramDataset -ne $hourDataset[0].name) { throw 'Histogram is not bound to occurrences_by_hour.' }
+          Write-Host 'OK: dashboard JSON, Gold sources, and hourly histogram contract valid.'
+
+      - name: Validate SQL contracts
+        shell: pwsh
+        run: ./scripts/validate_sql.ps1
